@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Brief</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;--bg2:#111;--bg3:#181818;--border:#222;--border2:#2a2a2a;
+  --text:#e8e6e0;--muted:#666;--muted2:#444;
+  --green:#22c55e;--red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;--purple:#a78bfa;
+  --green-dim:rgba(34,197,94,0.1);--red-dim:rgba(239,68,68,0.1);
+  --amber-dim:rgba(245,158,11,0.08);--blue-dim:rgba(59,130,246,0.1);--purple-dim:rgba(167,139,250,0.1);
+  --serif:'Instrument Serif',serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+.dash{max-width:960px;margin:0 auto;padding:28px 20px 60px}
+
+.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.header h1{font-family:var(--serif);font-size:32px;font-weight:400;font-style:italic;letter-spacing:-0.5px}
+.date{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.05em;text-transform:uppercase}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.mstatus{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.05em}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--muted2)}
+.sdot.open{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.lupdate{font-family:var(--mono);font-size:10px;color:var(--muted2)}
+.rbtn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;transition:all .2s;letter-spacing:.05em;text-transform:uppercase}
+.rbtn:hover{color:var(--text);border-color:var(--border2)}
+.rbtn.spinning svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.slabel{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.badge{font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase;margin-left:5px;vertical-align:middle}
+.badge-blue{background:var(--blue-dim);color:#60a5fa}
+.badge-purple{background:var(--purple-dim);color:var(--purple)}
+
+.idx-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:24px}
+.icard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;transition:border-color .2s}
+.icard:hover{border-color:var(--border2)}
+.iname{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.ival{font-family:var(--mono);font-size:17px;font-weight:500;letter-spacing:-0.5px}
+.ichg{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;margin-top:4px;padding:2px 6px;border-radius:4px}
+.up{color:var(--green)}.down{color:var(--red)}.neutral{color:var(--muted)}
+.ichg.up{background:var(--green-dim)}.ichg.down{background:var(--red-dim)}.ichg.neutral{background:var(--bg3)}
+
+.stocks-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;transition:border-color .2s}
+.scard:hover{border-color:var(--border2)}
+.scard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.sticker{font-family:var(--mono);font-size:11px;font-weight:500}
+.schg{font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:3px}
+.schg.up{color:var(--green);background:var(--green-dim)}.schg.down{color:var(--red);background:var(--red-dim)}.schg.neutral{color:var(--muted);background:var(--bg3)}
+.sprice{font-family:var(--mono);font-size:15px;font-weight:500}
+.sname{font-size:10px;color:var(--muted);margin-top:2px}
+
+.comm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+
+.three-col{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin-bottom:24px}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+
+.srow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.srank{font-family:var(--mono);font-size:10px;color:var(--muted2);width:14px;flex-shrink:0}
+.sn{font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar-w{width:44px;height:3px;background:var(--bg3);border-radius:2px;flex-shrink:0}
+.sbar{height:3px;border-radius:2px}
+.spct{font-family:var(--mono);font-size:11px;width:46px;text-align:right;flex-shrink:0}
+
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.mrow:last-child{border-bottom:none}
+.mlabel{font-size:11px;color:var(--muted)}
+.mright{text-align:right}
+.mval{font-family:var(--mono);font-size:13px;font-weight:500}
+.mchg{font-family:var(--mono);font-size:10px;margin-top:1px}
+.mdate{font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:1px}
+
+.fg-wrap{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.fg-lr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.fg-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.fg-val{font-family:var(--mono);font-size:12px;font-weight:500}
+.fg-track{height:5px;border-radius:3px;background:linear-gradient(to right,#22c55e,#f59e0b,#ef4444);position:relative;margin-bottom:5px}
+.fg-needle{position:absolute;top:-4px;width:11px;height:11px;border-radius:50%;background:var(--text);border:2px solid var(--bg);transform:translateX(-50%);transition:left 1s ease}
+.fg-labs{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted2)}
+
+.spacex-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:24px;display:flex;align-items:flex-start;gap:14px}
+.spacex-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.spacex-title{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.spacex-text{font-size:12px;color:var(--muted);line-height:1.6}
+
+.elist{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.ehdr{display:flex;padding:7px 14px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.ehdr span{font-family:var(--mono);font-size:9px;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase}
+.erow{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);gap:10px;transition:background .15s}
+.erow:last-child{border-bottom:none}
+.erow:hover{background:var(--bg3)}
+.edate{font-family:var(--mono);font-size:10px;color:var(--muted);width:68px;flex-shrink:0}
+.etick{font-family:var(--mono);font-size:12px;font-weight:500;width:52px;flex-shrink:0}
+.ename{font-size:11px;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.etime{width:72px;flex-shrink:0;text-align:center}
+.eeps{font-family:var(--mono);font-size:11px;width:72px;text-align:right;flex-shrink:0;color:var(--muted)}
+.erev{font-family:var(--mono);font-size:11px;width:72px;text-align:right;flex-shrink:0;color:var(--muted)}
+.tpill{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-family:var(--mono);letter-spacing:.05em}
+.tpill.bmo{background:var(--amber-dim);color:var(--amber)}
+.tpill.amc{background:var(--blue-dim);color:var(--blue)}
+
+.brief-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:24px}
+.brief-text{font-family:var(--serif);font-size:17px;line-height:1.82;font-style:italic}
+.brief-load{display:flex;align-items:center;gap:10px;color:var(--muted);font-family:var(--mono);font-size:11px}
+.bdots span{animation:blink 1.4s infinite both}
+.bdots span:nth-child(2){animation-delay:.2s}
+.bdots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+.brief-meta{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+
+.lval{color:var(--muted2);font-family:var(--mono);font-size:12px}
+.error-banner{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:11px;color:#fca5a5;display:none}
+
+@media(max-width:680px){
+  .idx-grid{grid-template-columns:repeat(3,1fr)}
+  .stocks-grid{grid-template-columns:repeat(2,1fr)}
+  .comm-grid{grid-template-columns:repeat(2,1fr)}
+  .three-col{grid-template-columns:1fr}
+  .erev,.eeps{display:none}
+}
+</style>
+</head>
+<body>
+<div class="dash">
+
+<div class="header">
+  <div>
+    <h1>Morning Brief</h1>
+    <div class="date" id="date-el"></div>
+  </div>
+  <div class="header-right">
+    <div class="mstatus"><div class="sdot" id="sdot"></div><span id="stext">Laden…</span></div>
+    <div class="lupdate" id="lupdate"></div>
+    <button class="rbtn" id="rbtn" onclick="loadAll()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+      Vernieuwen
+    </button>
+  </div>
+</div>
+
+<div class="error-banner" id="error-banner"></div>
+
+<div class="slabel">Indices</div>
+<div class="idx-grid" id="idx-grid">
+  <div class="icard"><div class="iname">S&P 500</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">Nasdaq</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">AEX</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">VIX</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">DXY</div><div class="ival lval">···</div></div>
+</div>
+
+<div class="slabel">Magnificent 7 + ASML <span class="badge badge-blue">Yahoo Finance</span></div>
+<div class="stocks-grid" id="stocks-grid">
+  <div class="scard"><div class="sticker lval">···</div></div>
+</div>
+
+<div class="slabel">Grondstoffen</div>
+<div class="comm-grid" id="comm-grid">
+  <div class="icard"><div class="iname">Goud</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">Zilver</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">WTI Olie</div><div class="ival lval">···</div></div>
+  <div class="icard"><div class="iname">Brent</div><div class="ival lval">···</div></div>
+</div>
+
+<div class="three-col">
+  <div>
+    <div class="slabel">Sectoren vandaag</div>
+    <div class="panel"><div id="sec-list" class="lval" style="font-size:11px;padding:8px 0">Laden…</div></div>
+  </div>
+  <div>
+    <div class="slabel">Rente & macro <span class="badge badge-blue">Yahoo</span></div>
+    <div class="panel">
+      <div id="ymacro"><div class="lval" style="font-size:11px;padding:8px 0">Laden…</div></div>
+      <div class="fg-wrap">
+        <div class="fg-lr"><span class="fg-lbl">Fear &amp; Greed</span><span class="fg-val" id="fg-text" style="color:var(--muted)">—</span></div>
+        <div class="fg-track"><div class="fg-needle" id="fg-needle" style="left:50%"></div></div>
+        <div class="fg-labs"><span>Angst</span><span>Neutraal</span><span>Hebzucht</span></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="slabel">Officiële macro <span class="badge badge-blue">FRED</span></div>
+    <div class="panel"><div id="fred-grid"><div class="lval" style="font-size:11px;padding:8px 0">Laden…</div></div></div>
+  </div>
+</div>
+
+<div class="slabel">SpaceX IPO Tracker <span class="badge badge-purple">Live nieuws</span></div>
+<div class="spacex-box">
+  <div class="spacex-icon">🚀</div>
+  <div style="flex:1">
+    <div class="spacex-title">SpaceX — Pre-IPO status</div>
+    <div id="spacex-content" class="spacex-text lval" style="font-size:11px">Laden…</div>
+  </div>
+</div>
+
+<div class="slabel">Earnings deze week <span class="badge badge-blue">FMP</span></div>
+<div class="elist">
+  <div class="ehdr">
+    <span style="width:68px;flex-shrink:0">Datum</span>
+    <span style="width:52px;margin-left:10px;flex-shrink:0">Ticker</span>
+    <span style="flex:1;margin-left:10px">Bedrijf</span>
+    <span style="width:72px;text-align:center;margin-left:10px">Moment</span>
+    <span style="width:72px;text-align:right;margin-left:10px">EPS est.</span>
+    <span style="width:72px;text-align:right;margin-left:10px">Omzet</span>
+  </div>
+  <div id="earn-list"><div class="erow"><span class="lval" style="font-size:11px">Laden…</span></div></div>
+</div>
+
+<div class="slabel">AI Morning Briefing</div>
+<div class="brief-box">
+  <div id="brief-el" class="brief-load">
+    <span>Briefing genereren</span>
+    <span class="bdots"><span>.</span><span>.</span><span>.</span></span>
+  </div>
+</div>
+
+</div>
+<script>
+const fmt=(n,d=2)=>n===null||n===undefined||isNaN(n)?'—':Number(n).toLocaleString('nl-NL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtB=n=>{if(!n)return '—';if(Math.abs(n)>=1e9)return '$'+fmt(n/1e9)+'B';if(Math.abs(n)>=1e6)return '$'+fmt(n/1e6)+'M';return '$'+fmt(n,0);};
+const sign=n=>n>0?'+':'';
+const cc=n=>n>0?'up':n<0?'down':'neutral';
+const ar=n=>n>0?'↑':n<0?'↓':'';
+
+document.getElementById('date-el').textContent = new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+function isOpen(){
+  const ny=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+  const h=ny.getHours(),m=ny.getMinutes(),day=ny.getDay();
+  if(day===0||day===6)return false;
+  return h*60+m>=570&&h*60+m<960;
+}
+
+function renderIndices(data){
+  const defs=[
+    {s:'^GSPC',l:'S&P 500'},{s:'^IXIC',l:'Nasdaq'},
+    {s:'^AEX',l:'AEX'},{s:'^VIX',l:'VIX'},{s:'DX-Y.NYB',l:'DXY'}
+  ];
+  document.getElementById('idx-grid').innerHTML=defs.map(({s,l})=>{
+    const x=data[s];
+    if(!x)return `<div class="icard"><div class="iname">${l}</div><div class="ival lval">—</div></div>`;
+    const c=cc(x.chg);
+    return `<div class="icard"><div class="iname">${l}</div><div class="ival">${fmt(x.price)}</div><div class="ichg ${c}">${ar(x.chg)} ${sign(x.chg)}${fmt(x.chg)}%</div></div>`;
+  }).join('');
+}
+
+function renderStocks(data){
+  const defs=[
+    {s:'AAPL',n:'Apple'},{s:'MSFT',n:'Microsoft'},{s:'NVDA',n:'Nvidia'},
+    {s:'GOOGL',n:'Alphabet'},{s:'AMZN',n:'Amazon'},{s:'META',n:'Meta'},
+    {s:'TSLA',n:'Tesla'},{s:'ASML',n:'ASML'}
+  ];
+  document.getElementById('stocks-grid').innerHTML=defs.map(({s,n})=>{
+    const x=data[s];
+    if(!x)return `<div class="scard"><div class="sticker">${s}</div><div class="sprice lval">—</div><div class="sname">${n}</div></div>`;
+    const c=cc(x.chg);
+    return `<div class="scard"><div class="scard-top"><span class="sticker">${s}</span><span class="schg ${c}">${sign(x.chg)}${fmt(x.chg)}%</span></div><div class="sprice">$${fmt(x.price)}</div><div class="sname">${n}</div></div>`;
+  }).join('');
+}
+
+function renderCommodities(data){
+  const defs=[
+    {s:'GC=F',l:'Goud',u:'$/oz'},{s:'SI=F',l:'Zilver',u:'$/oz'},
+    {s:'CL=F',l:'WTI Olie',u:'$/vat'},{s:'BZ=F',l:'Brent',u:'$/vat'}
+  ];
+  document.getElementById('comm-grid').innerHTML=defs.map(({s,l,u})=>{
+    const x=data[s];
+    if(!x)return `<div class="icard"><div class="iname">${l}</div><div class="ival lval">—</div></div>`;
+    const c=cc(x.chg);
+    return `<div class="icard"><div class="iname">${l} <span style="font-family:var(--mono);font-size:9px;color:var(--muted2)">${u}</span></div><div class="ival">$${fmt(x.price)}</div><div class="ichg ${c}">${ar(x.chg)} ${sign(x.chg)}${fmt(x.chg)}%</div></div>`;
+  }).join('');
+}
+
+function renderSectors(data){
+  const secs=[
+    {s:'XLK',n:'Technologie'},{s:'XLC',n:'Communicatie'},{s:'XLF',n:'Financials'},
+    {s:'XLV',n:'Gezondheidszorg'},{s:'XLI',n:'Industrie'},{s:'XLY',n:'Cons. Discret.'},
+    {s:'XLP',n:'Cons. Staples'},{s:'XLE',n:'Energie'},{s:'XLB',n:'Materialen'},
+    {s:'XLU',n:'Utilities'},{s:'XLRE',n:'Vastgoed'}
+  ];
+  const enriched=secs.map(({s,n})=>({n,chg:data[s]?.chg??null})).filter(x=>x.chg!==null).sort((a,b)=>b.chg-a.chg);
+  const mx=Math.max(...enriched.map(x=>Math.abs(x.chg)),0.01);
+  document.getElementById('sec-list').innerHTML=enriched.map((x,i)=>{
+    const c=cc(x.chg);const bw=Math.round(Math.abs(x.chg)/mx*44);
+    const bc=x.chg>0?'var(--green)':x.chg<0?'var(--red)':'var(--muted)';
+    return `<div class="srow"><span class="srank">${i+1}</span><span class="sn">${x.n}</span><div class="sbar-w"><div class="sbar" style="width:${bw}px;background:${bc}"></div></div><span class="spct ${c}">${sign(x.chg)}${fmt(x.chg)}%</span></div>`;
+  }).join('');
+}
+
+function renderMacro(macro, fred, fearGreed){
+  const items=[
+    {s:'^TNX',l:'10Y Rente VS',u:'%'},{s:'^TYX',l:'30Y Rente VS',u:'%'},{s:'EURUSD=X',l:'EUR/USD',u:''}
+  ];
+  document.getElementById('ymacro').innerHTML=items.map(({s,l,u})=>{
+    const x=macro[s];
+    if(!x)return `<div class="mrow"><span class="mlabel">${l}</span><div class="mright"><span class="mval">—</span></div></div>`;
+    const c=cc(x.chg);
+    return `<div class="mrow"><span class="mlabel">${l}</span><div class="mright"><div class="mval">${fmt(x.price)}${u}</div><div class="mchg ${c}">${sign(x.chg)}${fmt(x.chg)}%</div></div></div>`;
+  }).join('');
+
+  const fredItems=[
+    {k:'fedFunds',l:'Fed Funds Rate',u:'%'},
+    {k:'cpi',l:'Inflatie (CPI)',u:'%'},
+    {k:'unemployment',l:'Werkloosheid VS',u:'%'},
+    {k:'m2',l:'M2 Geldhoeveelheid',u:'T'},
+  ];
+  document.getElementById('fred-grid').innerHTML=fredItems.map(({k,l,u})=>{
+    const x=fred[k];if(!x)return `<div class="mrow"><span class="mlabel">${l}</span><div class="mright"><span class="mval">—</span></div></div>`;
+    const display=u==='T'?'$'+fmt(x.value/1000,1)+'T':fmt(x.value,2)+u;
+    const date=new Date(x.date).toLocaleDateString('nl-NL',{month:'short',year:'numeric'});
+    return `<div class="mrow"><span class="mlabel">${l}</span><div class="mright"><div class="mval">${display}</div><div class="mdate">${date}</div></div></div>`;
+  }).join('');
+
+  const nl={'Extreme Fear':'Extreme angst','Fear':'Angst','Neutral':'Neutraal','Greed':'Hebzucht','Extreme Greed':'Extreme hebzucht'};
+  const colors={'Extreme Fear':'var(--green)','Fear':'#86efac','Neutral':'var(--amber)','Greed':'#fca5a5','Extreme Greed':'var(--red)'};
+  document.getElementById('fg-text').textContent=`${fearGreed.score} — ${nl[fearGreed.rating]||fearGreed.rating}`;
+  document.getElementById('fg-text').style.color=colors[fearGreed.rating]||'var(--text)';
+  document.getElementById('fg-needle').style.left=fearGreed.score+'%';
+}
+
+function renderEarnings(earnings){
+  const el=document.getElementById('earn-list');
+  if(!earnings||!earnings.length){
+    el.innerHTML=`<div class="erow"><span class="ename" style="color:var(--muted);font-family:var(--mono);font-size:11px">Geen earnings data beschikbaar deze week</span></div>`;
+    return;
+  }
+  el.innerHTML=earnings.map(e=>{
+    const dt=new Date(e.date);
+    const ds=dt.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'});
+    const t=e.time==='bmo'||e.time?.includes('pre')?'bmo':e.time==='amc'||e.time?.includes('post')?'amc':'';
+    const pill=t?`<span class="tpill ${t}">${t==='bmo'?'Voor open':'Na sluit'}</span>`:`<span style="color:var(--muted2);font-family:var(--mono);font-size:10px">—</span>`;
+    return `<div class="erow"><span class="edate">${ds}</span><span class="etick">${e.symbol}</span><span class="ename">${e.name}</span><span class="etime">${pill}</span><span class="eeps">${e.epsEstimated?'$'+fmt(e.epsEstimated):'—'}</span><span class="erev">${fmtB(e.revenueEstimated)}</span></div>`;
+  }).join('');
+}
+
+async function generateBriefing(d){
+  const el=document.getElementById('brief-el');
+  const indices=['GSPC','IXIC','AEX'].map(s=>{
+    const k=Object.keys(d.indices).find(k=>k.includes(s));
+    return k?`${k}: ${fmt(d.indices[k].price)} (${sign(d.indices[k].chg)}${fmt(d.indices[k].chg)}%)`:'';
+  }).filter(Boolean).join(', ');
+
+  const topSecs=[...Object.entries(d.sectors)].sort((a,b)=>b[1].chg-a[1].chg);
+  const secText=`Best: ${topSecs[0]?.[0]} ${sign(topSecs[0]?.[1]?.chg)}${fmt(topSecs[0]?.[1]?.chg)}%, Slechtst: ${topSecs[topSecs.length-1]?.[0]} ${fmt(topSecs[topSecs.length-1]?.[1]?.chg)}%`;
+
+  const mag7=['AAPL','MSFT','NVDA','GOOGL','AMZN','META','TSLA'].map(s=>`${s}: ${sign(d.stocks[s]?.chg)}${fmt(d.stocks[s]?.chg)}%`).join(', ');
+  const asml=`ASML: $${fmt(d.stocks['ASML']?.price)} (${sign(d.stocks['ASML']?.chg)}${fmt(d.stocks['ASML']?.chg)}%)`;
+
+  const prompt=`Je bent een nuchtere, ervaren marktanalist. Schrijf een morning briefing in het Nederlands van 5-6 zinnen. Wees specifiek met cijfers. Geen bullet points. Vloeiende proza. Begin direct met de analyse.
+
+INDICES: ${indices}
+MAG 7: ${mag7}
+ASML: ${asml}
+SECTOREN: ${secText}
+GOUD: $${fmt(d.commodities['GC=F']?.price)}, OLIE (WTI): $${fmt(d.commodities['CL=F']?.price)}
+10Y RENTE: ${fmt(d.macro['^TNX']?.price)}%, EUR/USD: ${fmt(d.macro['EURUSD=X']?.price)}
+FED FUNDS: ${fmt(d.fred.fedFunds?.value)}%, INFLATIE: ${fmt(d.fred.cpi?.value)}%
+FEAR & GREED: ${d.fearGreed.score} (${d.fearGreed.rating})
+EARNINGS DEZE WEEK: ${d.earnings.slice(0,5).map(e=>e.symbol).join(', ')}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const json=await res.json();
+    const text=json.content?.[0]?.text||'Briefing niet beschikbaar.';
+    el.innerHTML=`<div class="brief-text">${text}</div><div class="brief-meta">Gegenereerd op ${new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})} · Data: Yahoo Finance · FRED · FMP · CNN</div>`;
+  }catch(e){
+    el.innerHTML='<span class="lval">Briefing niet beschikbaar.</span>';
+  }
+}
+
+async function loadSpaceX(){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        messages:[{role:'user',content:`Zoek naar het meest recente nieuws over een SpaceX IPO of beursgang (datum van vandaag: ${new Date().toLocaleDateString('nl-NL')}). Geef een feitelijke update van 2 zinnen in het Nederlands. Noem specifieke datums of bedragen als die beschikbaar zijn. Geen speculatie.`}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||null;
+    document.getElementById('spacex-content').textContent=text||'Geen recente updates gevonden.';
+  }catch(e){
+    document.getElementById('spacex-content').textContent='SpaceX is momenteel niet beursgenoteerd. Geen officiële IPO-datum bekendgemaakt.';
+  }
+}
+
+async function loadAll(){
+  const btn=document.getElementById('rbtn');btn.classList.add('spinning');
+  const open=isOpen();
+  document.getElementById('sdot').className='sdot'+(open?' open':'');
+  document.getElementById('stext').textContent=open?'Markt open':'Markt gesloten';
+  document.getElementById('lupdate').textContent='Bijgewerkt: '+new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'});
+
+  try{
+    const res=await fetch('/api/market-data');
+    if(!res.ok)throw new Error('API fout: '+res.status);
+    const d=await res.json();
+
+    renderIndices(d.indices);
+    renderStocks(d.stocks);
+    renderCommodities(d.commodities);
+    renderSectors(d.sectors);
+    renderMacro(d.macro, d.fred, d.fearGreed);
+    renderEarnings(d.earnings);
+
+    document.getElementById('error-banner').style.display='none';
+
+    await Promise.all([generateBriefing(d), loadSpaceX()]);
+  }catch(e){
+    const banner=document.getElementById('error-banner');
+    banner.style.display='block';
+    banner.textContent='Data kon niet worden opgehaald: '+e.message+'. Controleer of de Netlify function actief is.';
+  }
+
+  btn.classList.remove('spinning');
+}
+
+loadAll();
+</script>
+</body>
+</html>
